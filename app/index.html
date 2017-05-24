@@ -1,76 +1,160 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<!--[if lt IE 7]>
+<html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Gutenberg</title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
-  <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
-  <link rel="stylesheet" href="app.css">
-  <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-  <style>
-    #map {
-      height: 500px;
-      width: 100%;
-    }
-  </style>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Gutenberg</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/normalize.css">
+    <link rel="stylesheet" href="bower_components/html5-boilerplate/dist/css/main.css">
+    <link rel="stylesheet" href="app.css">
+    <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+
+        #container {
+            padding: 20px 15px;
+            width: 1280px;
+            margin-top: 30px;
+        }
+
+        #mysqlDB, #graphDB, #authorInput, #submitauthordb, #map {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 
 <body>
-<textarea typeof="text" name="author">Author Name</textarea>
-<br>
-<button name="submit" type="submit">Search</button>
-<br>
+<div class="container" id="container">
+    <form>
+        <input type="radio" name="db" id="mysqlDB" checked> MySQL <br>
+        <input type="radio" name="db" id="graphDB"> Neo4j <br>
+        <input type="text" name="authorInput" id="authorInput" value="Author Name"> </input><br>
+        <input type="submit" name="submit" id="submitauthordb" value="Search" onclick="sendRequests()"> </input><br>
+    </form>
+    <div id="map"></div>
+    <table class="table">
+        <thead>
+        <th>Title</th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="data in booksByAuthor">
+            <td>{{data.Title}} </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 
-<div id="map"></div>
+
 <script>
-  function initMap() {
-    var uluru = {lat: -25.363, lng: 131.044};
-    var map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 4,
-      center: uluru
-    });
-    var marker = new google.maps.Marker({
-      position: uluru,
-      map: map
-    });
-  }
+    function initMap(coordinates) {
+        var uluru = {lat: -25.363, lng: 131.044};
+        for(data in coordinates) {
+            var pin = {lat: data.latitude, lng: data.longitude}
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: uluru
+            });
+            var marker = new google.maps.Marker({
+                position: uluru,
+                map: map
+            });
+        }
+    };
 </script>
+<script>
+    var baseUrl = 'http://localhost:8080/'
+
+    //Get all books from author
+    function getBooksByAuthor(author, db){
+        function sendAuthorRequest($scope, $http){
+            $http.get(url+db+"/"+author).then(function successCallBack(res){
+                $scope.booksByAuthor = res.data;
+            }), function errorCallBack(res){
+                alert("øv")
+            }
+        }
+    };
+
+    // get geolocation of book
+    function getLocationByBook(book, db){
+        function sendBookRequest($scope, $http){
+            $http.get(url+db+"/"+book).then(function successCallBack(res){
+                $scope.geolocations = res.data;
+            }), function errorCallBack(res){
+                alert("øv")
+            }
+        }
+    };
+
+    //For each book, get geolocation (uses getLocationByBook)
+    function getLocationByBooks(db, $scope){
+        for(book in $scope.booksByAuthor){
+            getLocationByBook(book, db)
+        }
+    };
+
+    //"main" method
+    function sendRequests($scope) {
+        var selectedDb = "";
+        getSelectedDb(selectedDb)
+        getBooksByAuthor(
+                document.getElementById("authorInput").value,
+                selectedDb
+        )
+        getLocationByBooks(selectedDb, $scope);
+        initMap($scope.geolocations)
+    };
+
+    function getSelectedDb(selectedDB){
+        if(document.getElementById('mysqlDB').checked){
+            selectedDb = "mysql"
+        }
+        if(document.getElementById('graphDB').checked){
+            selectedDb = "graph"
+        }
+    };
+
+    function initMap(coordinates) {
+        //var uluru = {lat: -25.363, lng: 131.044};
+        for(data in coordinates) {
+            var pin = {lat: data.latitude, lng: data.longitude}
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 4,
+                center: pin
+            });
+            var marker = new google.maps.Marker({
+                position: pin,
+                map: map
+            });
+        }
+    };
+
+</script>
+
+
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBB_wZo3tJ1Pytb3S6xaTXZCmJWUWSQKIs&callback=initMap">
 </script>
-
-
-
-<!--
-  <ul class="menu">
-    <li><a href="#!/MySQLview">MySQLview</a></li>
-    <li><a href="#!/view2">view2</a></li>
-  </ul>
-  -->
-
-  <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-  <![endif]-->
-<!--
-  <div ng-view></div>
--->
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
-  -->
-  <script src="bower_components/angular/angular.js"></script>
-  <script src="bower_components/angular-route/angular-route.js"></script>
-  <script src="app.js"></script>
-  <script src="MySQLview/MySQLview.js"></script>
-  <script src="view2/view2.js"></script>
-  <script src="components/version/version.js"></script>
-  <script src="components/version/version-directive.js"></script>
-  <script src="components/version/interpolate-filter.js"></script>
+<script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/angular-route/angular-route.js"></script>
+<script src="app.js"></script>
+<script src="MySQLview/MySQLview.js"></script>
+<script src="view2/view2.js"></script>
+<script src="components/version/version.js"></script>
+<script src="components/version/version-directive.js"></script>
+<script src="components/version/interpolate-filter.js"></script>
 </body>
 </html>
