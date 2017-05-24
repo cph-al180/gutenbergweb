@@ -12,11 +12,13 @@ angular.module('myApp.MySQLview', ['ngRoute'])
 .controller('MySQLviewCtrl', function ($scope, $http){
     var url = 'http://localhost:8080/mysql/cities';
     $http.get(url).then(function successCallBack(res){
-      $scope.data = res.data;
+      $scope.cities = res.data;
     }), function errorCallBack(res){
       alert("Øv");
     }
 });
+
+
 
 
 
