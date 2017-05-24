@@ -72,9 +72,9 @@
     };
 
     // get geolocation of book
-    function getLocationByBook(book, db){
+    function getLocationByBook(title, db){
         function sendBookRequest($scope, $http){
-            $http.get(url+db+"/"+book).then(function successCallBack(res){
+            $http.get(url+db+"/"+title).then(function successCallBack(res){
                 $scope.geolocations = res.data;
             }), function errorCallBack(res){
                 alert("øv")
@@ -85,18 +85,18 @@
     //For each book, get geolocation (uses getLocationByBook)
     function getLocationByBooks(db, $scope){
         for(book in $scope.booksByAuthor){
-            getLocationByBook(book, db)
+            getLocationByBook(book.title, db)
         }
     };
 
     //"main" method
     function sendRequests($scope) {
         var selectedDb = "";
-        getSelectedDb(selectedDb)
+        getSelectedDb(selectedDb);
         getBooksByAuthor(
                 document.getElementById("authorInput").value,
                 selectedDb
-        )
+        );
         getLocationByBooks(selectedDb, $scope);
         initMap($scope.geolocations)
     };
