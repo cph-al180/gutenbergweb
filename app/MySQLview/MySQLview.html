@@ -1,50 +1,39 @@
-<head>
-    <style>
-        #map {
-            height: 400px;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-<h3>My Google Maps Demo</h3>
-<div id="map"></div>
-<script>
-    function initMap() {
-        var uluru = {lat: -25.363, lng: 131.044};
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 4,
-            center: uluru
-        });
-        var marker = new google.maps.Marker({
-            position: uluru,
-            map: map
-        });
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
     }
-</script>
+
+    #container {
+        padding: 20px 15px;
+        width: 1280px;
+        margin-top: 30px;
+    }
+
+    #map {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container" id="container">
+    <div id="map"></div>
+    <table class="table">
+        <thead>
+        <th>Title</th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="data in booksByAuthor">
+            <td>{{data.Title}} </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
 <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBB_wZo3tJ1Pytb3S6xaTXZCmJWUWSQKIs&callback=initMap">
 </script>
-</body>
 
 
-<!--
-<table class="table">
-    <thead>
-    <th>ID</th>
-    <th>Latitude</th>
-    <th>Longitude</th>
-    <th>City Name</th>
-    </thead>
-    <tbody>
-    <tr ng-repeat="data in data">
-        <td>{{cities.id}} </td>
-        <td>{{cities.latitude}} </td>
-        <td>{{cities.longitude}} </td>
-        <td>{{cities.cityName}} </td>
-    </tr>
-    </tbody>
-</table>
--->
+
 
 

@@ -19,118 +19,34 @@
     <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <style>
-        #map {
-            height: 500px;
-            width: 100%;
-        }
-
         #container {
             padding: 20px 15px;
             width: 1280px;
             margin-top: 30px;
         }
-
-        #mysqlDB, #graphDB, #authorInput, #submitauthordb, #map {
+        #mysqlDB, #graphDB, #authorInput, #submitauthordb {
             margin-bottom: 10px;
         }
     </style>
 </head>
-
 <body>
 <div class="container" id="container">
     <form>
         <input type="radio" name="db" id="mysqlDB" checked> MySQL <br>
         <input type="radio" name="db" id="graphDB"> Neo4j <br>
         <input type="text" name="authorInput" id="authorInput" value="Author Name"> </input><br>
-        <input type="submit" name="submit" id="submitauthordb" value="Search" onclick="sendRequests()"> </input><br>
+        <a class="btn btn-success" ng-href="/guternbergweb/app/index.html#!/MySQLview" id="submitauthordb"> Search </a>
+
+        </input><br>
+
     </form>
-    <div id="map"></div>
-    <table class="table">
-        <thead>
-        <th>Title</th>
-        </thead>
-        <tbody>
-        <tr ng-repeat="data in booksByAuthor">
-            <td>{{data.Title}} </td>
-        </tr>
-        </tbody>
-    </table>
 </div>
 
-<script>
-    var baseUrl = 'http://localhost:8080/'
 
-    //Get all books from author
-    function getBooksByAuthor(author, db){
-        function sendAuthorRequest($scope, $http){
-            $http.get(url+db+"/"+author).then(function successCallBack(res){
-                $scope.booksByAuthor = res.data;
-            }), function errorCallBack(res){
-                alert("øv")
-            }
-        }
-    };
-
-    // get geolocation of book
-    function getLocationByBook(title, db){
-        function sendBookRequest($scope, $http){
-            $http.get(url+db+"/"+title).then(function successCallBack(res){
-                $scope.geolocations = res.data;
-            }), function errorCallBack(res){
-                alert("øv")
-            }
-        }
-    };
-
-    //For each book, get geolocation (uses getLocationByBook)
-    function getLocationByBooks(db, $scope){
-        for(book in $scope.booksByAuthor){
-            getLocationByBook(book.title, db)
-        }
-    };
-
-    //"main" method
-    function sendRequests($scope) {
-        var selectedDb = "";
-        getSelectedDb(selectedDb);
-        getBooksByAuthor(
-                document.getElementById("authorInput").value,
-                selectedDb
-        );
-        getLocationByBooks(selectedDb, $scope);
-        initMap($scope.geolocations)
-    };
-
-    function getSelectedDb(selectedDB){
-        if(document.getElementById('mysqlDB').checked){
-            selectedDb = "mysql"
-        }
-        if(document.getElementById('graphDB').checked){
-            selectedDb = "graph"
-        }
-    };
-
-    function initMap(coordinates) {
-        //var uluru = {lat: -25.363, lng: 131.044};
-        for(data in coordinates) {
-            var pin = {lat: data.latitude, lng: data.longitude}
-            var map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 4,
-                center: pin
-            });
-            var marker = new google.maps.Marker({
-                position: pin,
-                map: map
-            });
-        }
-    };
-
-</script>
+<div ng-view></div>
 
 
-<script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBB_wZo3tJ1Pytb3S6xaTXZCmJWUWSQKIs&callback=initMap">
-</script>
+
 <script src="bower_components/angular/angular.js"></script>
 <script src="bower_components/angular-route/angular-route.js"></script>
 <script src="app.js"></script>
